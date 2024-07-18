@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 function App() {
   const [text, setText] = useState('');
   const [file, setFile] = useState();
+  const [sentiment, setSentiment] = useState({});
 
   const emojiObj = {
     neutral: (
@@ -28,9 +29,9 @@ function App() {
   };
   
   const getEmoji = (score) => {
-    if (score > 20) {
+    if (score > 40) {
       return emojiObj["positive"];
-    } else if (score >= 0 && score <= 20) {
+    } else if (score > 20 && score <= 40) {
       return emojiObj["neutral"];
     } else {
       return emojiObj["negative"];
@@ -54,7 +55,7 @@ function App() {
     // Default options are marked with *
     const response = await fetch(url, {
       method: "POST", // *GET, POST, PUT, DELETE, etc.
-       mode: "no-cors", // no-cors, *cors, same-origin
+     // mode: "no-cors", // no-cors, *cors, same-origin
       cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
       credentials: "same-origin", // include, *same-origin, omit
       headers: {
@@ -75,7 +76,7 @@ function App() {
       const response = await postData("http://localhost:5002/api/sentiment", reqBody);
       response.emoji = getEmoji(response.score);
       console.log(response)
-     // setSentiment(response);
+     setSentiment(response);
     } catch (error) {}
   };
  return (
@@ -87,7 +88,7 @@ function App() {
      <textarea name="textInput" placeholder="Explain about your feeling" value={text} onChange={handleTextChange} /><br />
      <input type="submit" value="Analysis" onClick={handleSentimentalAnalysis} />
      <input type="reset" onClick={() => setText('')} />
-
+     {!!sentiment.emoji ? <div style={{color: "#9f9c9c", display: "flex", alignItems: "center", fontSize: "1rem", justifyContent: "flex-start"}}>Overall sentiment of the content: {sentiment.emoji} </div> : <span></span> }
      <h4>In Image</h4>
      <img alt="emotion" id="uploadedImage" src={file || "th.jpeg"} height="200px" width="200px"/><br/>
      <label htmlFor="imageInput">Upload image</label>
