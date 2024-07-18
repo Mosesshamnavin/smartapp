@@ -4,6 +4,7 @@ const { SentimentManager } = require("node-nlp");
 const sentiment = new SentimentManager();
 
 module.exports = async (req, res, next) => {
+  console.log(req.body);
   if (!req?.body?.phrase) {
     return next(
       new BadRequest(
