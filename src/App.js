@@ -100,10 +100,9 @@ function App() {
   <>
   <h1>Let's check about yourself</h1>
    <div className="App">
-    <form>
      <h4>In text</h4>
      <textarea name="textInput" placeholder="Explain about your feeling" value={text} onChange={handleTextChange} /><br />
-     <input type="submit" value="Analysis" onClick={handleSentimentalAnalysis} />
+     <button type="submit" onClick={handleSentimentalAnalysis} >Analysis</button>
      <input type="reset" onClick={() => setText('')} />
      {!!sentiment.emoji ? <div style={{color: "#9f9c9c", display: "flex", alignItems: "center", fontSize: "1rem", justifyContent: "flex-start"}}>Overall sentiment of the content: {sentiment.emoji} </div> : <span></span> }
      <h4>In Image</h4>
@@ -111,7 +110,6 @@ function App() {
      <label htmlFor="imageInput">Upload image</label>
      <input type="file" id="imageInput" onChange={handleFileChange} accept="image/jpeg, image/png, image/jpg" />
      <button type="submit" onClick={handleSubmit}>Submit</button>
-     </form>
      <div>
       {feacExpression.map((face, index) => (
           <div key={index}>
