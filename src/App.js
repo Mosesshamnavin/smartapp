@@ -5,6 +5,8 @@ function App() {
   const [text, setText] = useState('');
   const [file, setFile] = useState();
   const [sentiment, setSentiment] = useState({});
+  const [feacExpression, setFaceExpression] = useState([]);
+  const [image, setImage] = useState({  data: '' })
 
   const emojiObj = {
     neutral: (
@@ -44,12 +46,27 @@ function App() {
 
   const handleFileChange = (e) => {
     setFile(URL.createObjectURL(e.target.files[0]));
+    const img = {
+      data: e.target.files[0],
+    }
+    setImage(img);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    console.log('Text:', text);
-    console.log('File:', file);
+    //console.log('Text:', text);
+    //console.log('File:', file);
+    let formData = new FormData()
+    formData.append('file', image.data)
+     await fetch('http://localhost:5002/api/test', {
+      method: 'POST',
+      body: formData,
+    })
+    .then((res) => res.json())
+    .then((json) =>{
+      console.log(json);
+      setFaceExpression(json.data)
+    });
   };
   const postData = async (url = "", data = {}) => {
     // Default options are marked with *
@@ -75,7 +92,7 @@ function App() {
     try {
       const response = await postData("http://localhost:5002/api/sentiment", reqBody);
       response.emoji = getEmoji(response.score);
-      console.log(response)
+      //console.log(response)
      setSentiment(response);
     } catch (error) {}
   };
@@ -83,7 +100,7 @@ function App() {
   <>
   <h1>Let's check about yourself</h1>
    <div className="App">
-    <form onSubmit={handleSubmit}>
+    <form>
      <h4>In text</h4>
      <textarea name="textInput" placeholder="Explain about your feeling" value={text} onChange={handleTextChange} /><br />
      <input type="submit" value="Analysis" onClick={handleSentimentalAnalysis} />
@@ -93,9 +110,18 @@ function App() {
      <img alt="emotion" id="uploadedImage" src={file || "th.jpeg"} height="200px" width="200px"/><br/>
      <label htmlFor="imageInput">Upload image</label>
      <input type="file" id="imageInput" onChange={handleFileChange} accept="image/jpeg, image/png, image/jpg" />
-     <button type="submit">Submit</button>
-
+     <button type="submit" onClick={handleSubmit}>Submit</button>
      </form>
+     <div>
+      {feacExpression.map((face, index) => (
+          <div key={index}>
+            <div>Face Expression Percentage: {face.expressionPercentage}</div>
+            <div>Expression: {face.expression}</div>
+            <div>Gender: {face.gender}</div>
+            <div>Age: {face.age}</div>
+          </div>
+      ))}
+     </div>
      </div>
     </>
   );

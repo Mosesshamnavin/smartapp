@@ -111,10 +111,10 @@ function print(face) {
   const box = [face.alignedRect._box._x, face.alignedRect._box._y, face.alignedRect._box._width, face.alignedRect._box._height];
   const gender = `Gender: ${Math.round(100 * face.genderProbability)}% ${face.gender}`;
   log.data(`Detection confidence: ${Math.round(100 * face.detection._score)}% ${gender} Age: ${Math.round(10 * face.age) / 10} Expression: ${Math.round(100 * expression[1])}% ${expression[0]} Box: ${box.map((a) => Math.round(a))}`);
+  return { expressionPercentage: Math.round(100 * expression[1]), expression: expression[0], confidence: Math.round(100 * face.detection._score), gender: gender, age: Math.round(10 * face.age) / 10 }
 }
 
-async function main() {
-    console.log("Test Test");
+async function main(img) {
   log.header();
   log.info('FaceAPI single-process test');
 
@@ -134,20 +134,24 @@ async function main() {
   await faceapi.nets.faceRecognitionNet.loadFromDisk(modelPath);
   await faceapi.nets.faceExpressionNet.loadFromDisk(modelPath);
   optionsSSDMobileNet = new faceapi.SsdMobilenetv1Options({ minConfidence, maxResults });
-
   if (process.argv.length !== 4) {
     const t0 = process.hrtime.bigint();
     const dir = fs.readdirSync(imgPathRoot);
-    for (const img of dir) {
-      if (!img.toLocaleLowerCase().endsWith('.jpg')) continue;
+    let finalresult =[];
+   // for (const img of dir) {
+      if (img.toLocaleLowerCase().endsWith('.jpg')) {
       const tensor = await image(path.join(imgPathRoot, img));
       const result = await detect(tensor);
       log.data('Image:', img, 'Detected faces:', result.length);
-      for (const face of result) print(face);
+      for (const face of result){
+        finalresult.push(print(face));
+      } 
       tensor.dispose();
-    }
+      }
+   // }
     const t1 = process.hrtime.bigint();
     log.info('Processed', dir.length, 'images in', Math.trunc(Number((t1 - t0)) / 1000 / 1000), 'ms');
+    return finalresult;
   } else {
     const param = process.argv[2];
     if (fs.existsSync(param) || param.startsWith('http:') || param.startsWith('https:')) {
@@ -162,9 +166,9 @@ async function main() {
 }
 
 const postFaceDetection2 = async (req, res, next) => {
-  console.log("Test test");
- await main();
- res.json("test");
+ const result = await main(req.file.filename);
+ //console.log("result", result);
+ res.json({ data: result });
 
 }
 
